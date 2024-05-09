@@ -6,6 +6,18 @@ import Error from "../Error/Error";
 import ImageGallery from "../ImageGallery/ImageGallery";
 import { fetchImagesWithQuery } from "../../search-api";
 import LoadMoreBtn from "../LoadMoreBtn/LoadMoreBtn";
+import ImageModal from "../ImageModal/ImageModal";
+
+const customStyles = {
+  content: {
+    top: "50%",
+    left: "50%",
+    right: "auto",
+    bottom: "auto",
+    marginRight: "-50%",
+    transform: "translate(-50%, -50%)",
+  },
+};
 
 
 
@@ -15,7 +27,9 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
   const [page,setPage] = useState(1)
-  const [query,setQuery] = useState('')
+  const [query, setQuery] = useState('')
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
 
   const handleSearch = async (query) => {
@@ -52,15 +66,31 @@ function App() {
     }
   }
 
+  const handleModalOpen = () => {
+    setIsModalOpen(!isModalOpen)
+  }
+
   return (
     <>
-      <SearchBar onSearch={handleSearch}  setWord={setQuery} />
+      <SearchBar onSearch={handleSearch} setWord={setQuery} />
       {loading && <Loader />}
       {error && <Error />}
-      {images.length > 0 && <ImageGallery data={images} />}
+      {images.length > 0 && (
+        <ImageGallery data={images} onOpenModal={handleModalOpen} />
+      )}
       {images.length > 0 && <LoadMoreBtn onAddSearch={handleAddSearch} />}
-      
-      <Toaster/>
+      {isModalOpen && (
+        <ImageModal
+          isOpen={isModalOpen}
+          onClose={() => handleModalOpen(false)}
+          style={customStyles}
+        >
+          {images.map((item) => (
+            <img key={item.id} src={item.urls.regular} alt />
+          ))}
+        </ImageModal>
+      )}
+      <Toaster />
     </>
   );
 }
