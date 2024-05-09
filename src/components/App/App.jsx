@@ -8,16 +8,6 @@ import { fetchImagesWithQuery } from "../../search-api";
 import LoadMoreBtn from "../LoadMoreBtn/LoadMoreBtn";
 import ImageModal from "../ImageModal/ImageModal";
 
-const customStyles = {
-  content: {
-    top: "50%",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    marginRight: "-50%",
-    transform: "translate(-50%, -50%)",
-  },
-};
 
 
 
@@ -29,6 +19,7 @@ function App() {
   const [page,setPage] = useState(1)
   const [query, setQuery] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [imgUrl, setImgUrl] = useState("")
 
 
 
@@ -39,6 +30,10 @@ function App() {
       setLoading(true);
       setPage(1)
       const data = await fetchImagesWithQuery(query, page);
+      console.log(data);
+      if (data.data.total === 0) {
+        setError(true)
+      }
       setImages(data.data.results);
       setPage(page + 1);
     } catch (error) {
@@ -70,25 +65,26 @@ function App() {
     setIsModalOpen(!isModalOpen)
   }
 
+  const handleImageClick = (imgUrl) => {
+    setImgUrl(imgUrl);
+    handleModalOpen()
+  }
+
   return (
     <>
       <SearchBar onSearch={handleSearch} setWord={setQuery} />
       {loading && <Loader />}
       {error && <Error />}
       {images.length > 0 && (
-        <ImageGallery data={images} onOpenModal={handleModalOpen} />
+        <ImageGallery data={images} onImgClick={handleImageClick} />
       )}
       {images.length > 0 && <LoadMoreBtn onAddSearch={handleAddSearch} />}
       {isModalOpen && (
         <ImageModal
           isOpen={isModalOpen}
-          onClose={() => handleModalOpen(false)}
-          style={customStyles}
-        >
-          {images.map((item) => (
-            <img key={item.id} src={item.urls.regular} alt />
-          ))}
-        </ImageModal>
+          onClose={() => handleModalOpen()}
+          imgUrl={imgUrl}
+        ></ImageModal>
       )}
       <Toaster />
     </>
