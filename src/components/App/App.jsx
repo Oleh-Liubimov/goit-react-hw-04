@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SearchBar from "../SearchBar/SearchBar"
 import Loader from "../Loader/Loader";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import Error from "../Error/Error";
 import ImageGallery from "../ImageGallery/ImageGallery";
 import { fetchImagesWithQuery } from "../../search-api";
 import LoadMoreBtn from "../LoadMoreBtn/LoadMoreBtn";
 import ImageModal from "../ImageModal/ImageModal";
+import { perPage } from "../../search-api";
 
 
 
@@ -16,30 +17,46 @@ function App() {
   const [images, setImages] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
-  const [page,setPage] = useState(1)
+  const [page,setPage] = useState(0)
   const [query, setQuery] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imgUrl, setImgUrl] = useState("")
 
+  useEffect(() => {
+    if (!query) return;
+    async function fetchImages() {
+      try {
+        
+        const data = await fetchImagesWithQuery(query, page);
+        if (data.data.total === 0) {
+          setError(true);
+        }
+        if (page > Math.ceil(data.data.total_pages / perPage)) {
+          const endOfCollection = () =>
+            toast("Sorry, but you've reached the end of search results");
+          endOfCollection()
+          return
+        }
+          setImages((i) => [...i, ...data.data.results]);       
+      } catch (error) {
+        setError(true)
+      }
+    }
+    fetchImages()
+  
+    
+  }, [page,query])
+  
 
 
-  const handleSearch = async (query) => {
+
+  const handleSearch = () => {
     try {
       setImages([]);
       setError(false);
       setLoading(true);
-      setPage(1)
-      const data = await fetchImagesWithQuery(query, page);
-      console.log(data);
-      if (data.data.total === 0) {
-        setError(true)
-      }
-      setImages(data.data.results);
       setPage(page + 1);
-    } catch (error) {
-      console.log(error);
-      setError(true)
-    } finally {
+    }finally {
       setLoading(false)
     }
   }
@@ -48,14 +65,7 @@ function App() {
     try {
       setError(false)
       setLoading(true)
-      const nextPage = page + 1
-      const moreData = await fetchImagesWithQuery(query, nextPage)
-      setImages((i) => (
-        [...i,...moreData.data.results]
-      ))
-      setQuery(nextPage)
-    } catch (error) {
-      setError(true);
+      setPage(page + 1)
     } finally {
       setLoading(false)
     }

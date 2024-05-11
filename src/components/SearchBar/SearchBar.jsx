@@ -9,13 +9,11 @@ export default function SearchBar({ onSearch,  setWord }) {
     evt.preventDefault();
     const form = evt.target;
     const query = form.elements.search.value;
-
-    setWord(query)
-
     if (query.trim() === "") {
       notification();
       return;
     }
+    setWord(query)
     onSearch(query);
     form.reset();
   }
