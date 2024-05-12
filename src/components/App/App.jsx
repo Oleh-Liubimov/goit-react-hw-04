@@ -17,16 +17,17 @@ function App() {
   const [images, setImages] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
-  const [page,setPage] = useState(0)
+  const [page,setPage] = useState(1)
   const [query, setQuery] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imgUrl, setImgUrl] = useState("")
+  console.log(images);
 
   useEffect(() => {
     if (!query) return;
     async function fetchImages() {
       try {
-        
+        setLoading(true);
         const data = await fetchImagesWithQuery(query, page);
         if (data.data.total === 0) {
           setError(true);
@@ -40,7 +41,10 @@ function App() {
           setImages((i) => [...i, ...data.data.results]);       
       } catch (error) {
         setError(true)
+      } finally {
+        setLoading(false)
       }
+    
     }
     fetchImages()
   
@@ -54,14 +58,13 @@ function App() {
     try {
       setImages([]);
       setError(false);
-      setLoading(true);
-      setPage(page + 1);
+      setPage(1);
     }finally {
       setLoading(false)
     }
   }
   
-  const handleAddSearch = async () => {
+  const handleAddSearch =  () => {
     try {
       setError(false)
       setLoading(true)
