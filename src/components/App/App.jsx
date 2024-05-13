@@ -21,13 +21,13 @@ function App() {
   const [query, setQuery] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imgUrl, setImgUrl] = useState("")
-  console.log(images);
 
   useEffect(() => {
     if (!query) return;
     async function fetchImages() {
       try {
         setLoading(true);
+        setError(false)
         const data = await fetchImagesWithQuery(query, page);
         if (data.data.total === 0) {
           setError(true);
@@ -55,33 +55,23 @@ function App() {
 
 
   const handleSearch = () => {
-    try {
       setImages([]);
-      setError(false);
       setPage(1);
-    }finally {
-      setLoading(false)
     }
-  }
   
   const handleAddSearch =  () => {
-    try {
-      setError(false)
-      setLoading(true)
       setPage(page + 1)
-    } finally {
-      setLoading(false)
-    }
+
   }
 
   const handleModalOpen = () => {
     setIsModalOpen(!isModalOpen)
   }
 
-  const handleImageClick = (imgUrl) => {
-    setImgUrl(imgUrl);
-    handleModalOpen()
-  }
+const handleImageClick = (imgUrl) => {
+  setImgUrl(imgUrl);
+  handleModalOpen()
+}
 
   return (
     <>
